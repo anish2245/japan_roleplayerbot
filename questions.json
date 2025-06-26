@@ -1,0 +1,74 @@
+{
+"country": "Japan",
+"territory": "japan",
+  "products": "Paracetamol",
+  "alternateNames": ["Acetaminophen", "Tylenol", "Panadol"],
+  "questions": [
+    {
+      "id": "q001",
+      "question": "What is the chemical composition of paracetamol?",
+      "answer": "Paracetamol (acetaminophen) has the chemical formula C8H9NO2. Its chemical name is N-(4-hydroxyphenyl)acetamide or 4'-hydroxyacetanilide. It consists of 63.57% carbon, 6.00% hydrogen, 9.27% nitrogen, and 21.16% oxygen by mass."
+    },
+    {
+      "id": "q002",
+      "question": "What is the recommended dosage of paracetamol for adults?",
+      "answer": "The standard recommended dosage for adults is 500-1000 mg every 4-6 hours as needed, with a maximum daily dose of 4000 mg (4 grams) in 24 hours. However, in some countries and clinical settings, the maximum recommended daily dose has been reduced to 3000 mg (3 grams) to reduce the risk of liver damage."
+    },
+    {
+      "id": "q003",
+      "question": "What are the main therapeutic effects of paracetamol?",
+      "answer": "Paracetamol has two primary therapeutic effects: it acts as an analgesic (pain reliever) and an antipyretic (fever reducer). Unlike NSAIDs such as ibuprofen or aspirin, paracetamol has minimal anti-inflammatory effects and does not significantly inhibit platelet aggregation or affect blood clotting."
+    }
+  ]
+}
+
+------------- format
+{
+"country": "Japan",
+"territory": "japan",
+  "products":[
+     
+    "Paracetamol",
+  "alternateNames": ["Acetaminophen", "Tylenol", "Panadol"],
+  "questions": [
+    {
+      "id": "q001",
+      "question": "What is the chemical composition of paracetamol?",
+      "answer": "Paracetamol (acetaminophen) has the chemical formula C8H9NO2. Its chemical name is N-(4-hydroxyphenyl)acetamide or 4'-hydroxyacetanilide. It consists of 63.57% carbon, 6.00% hydrogen, 9.27% nitrogen, and 21.16% oxygen by mass."
+    },
+    {
+      "id": "q002",
+      "question": "What is the recommended dosage of paracetamol for adults?",
+      "answer": "The standard recommended dosage for adults is 500-1000 mg every 4-6 hours as needed, with a maximum daily dose of 4000 mg (4 grams) in 24 hours. However, in some countries and clinical settings, the maximum recommended daily dose has been reduced to 3000 mg (3 grams) to reduce the risk of liver damage."
+    },
+    {
+      "id": "q003",
+      "question": "What are the main therapeutic effects of paracetamol?",
+      "answer": "Paracetamol has two primary therapeutic effects: it acts as an analgesic (pain reliever) and an antipyretic (fever reducer). Unlike NSAIDs such as ibuprofen or aspirin, paracetamol has minimal anti-inflammatory effects and does not significantly inhibit platelet aggregation or affect blood clotting."
+    }
+  ], 
+    "Citrazin",
+  "alternateNames": ["Acetaminophen", "Tylenol", "Panadol"],
+  "questions": [
+    {
+      "id": "q001",
+      "question": "What is the chemical composition of paracetamol?",
+      "answer": "Paracetamol (acetaminophen) has the chemical formula C8H9NO2. Its chemical name is N-(4-hydroxyphenyl)acetamide or 4'-hydroxyacetanilide. It consists of 63.57% carbon, 6.00% hydrogen, 9.27% nitrogen, and 21.16% oxygen by mass."
+    },
+    {
+      "id": "q002",
+      "question": "What is the recommended dosage of paracetamol for adults?",
+      "answer": "The standard recommended dosage for adults is 500-1000 mg every 4-6 hours as needed, with a maximum daily dose of 4000 mg (4 grams) in 24 hours. However, in some countries and clinical settings, the maximum recommended daily dose has been reduced to 3000 mg (3 grams) to reduce the risk of liver damage."
+    },
+    {
+      "id": "q003",
+      "question": "What are the main therapeutic effects of paracetamol?",
+      "answer": "Paracetamol has two primary therapeutic effects: it acts as an analgesic (pain reliever) and an antipyretic (fever reducer). Unlike NSAIDs such as ibuprofen or aspirin, paracetamol has minimal anti-inflammatory effects and does not significantly inhibit platelet aggregation or affect blood clotting."
+    }
+  ]
+
+    
+  ]
+    
+   
+}

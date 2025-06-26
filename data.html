@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pharmaceutical Information Portal</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1048.0.min.js"></script>
+    <script src="https://unpkg.com/amazon-cognito-identity-js@5.2.10/dist/amazon-cognito-identity.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .hidden { display: none; }
+        #loginForm, #registrationForm { border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; }
+        input { margin-bottom: 10px; padding: 8px; width: 100%; }
+        button { padding: 10px; background-color: #0073bb; color: white; border: none; cursor: pointer; }
+        #chatContainer { border: 1px solid #ddd; height: 500px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Portal Sign Up</h1>
+        
+        <!-- Authentication Section -->
+        <div id="authSection">
+            <div id="loginForm">
+                <h2>Sign In</h2>
+                <input type="text" id="username" placeholder="Username">
+                <input type="password" id="password" placeholder="Password">
+                <button onclick="signIn()">Sign In</button>
+                <p>Don't have an account? <a href="#" onclick="toggleForms()">Register</a></p>
+            </div>
+            
+            <div id="registrationForm" class="hidden">
+                <h2>Register</h2>
+                <input type="text" id="regUsername" placeholder="Username">
+                <input type="email" id="email" placeholder="Email">
+                <input type="password" id="regPassword" placeholder="Password">
+                <button onclick="signUp()">Register</button>
+                <div id="confirmationDiv" class="hidden">
+                    <input type="text" id="confirmationCode" placeholder="Confirmation Code">
+                    <button onclick="confirmRegistration()">Confirm Registration</button>
+                </div>
+                <p>Already have an account? <a href="#" onclick="toggleForms()">Sign In</a></p>
+            </div>
+        </div>
+        
+        <!-- Chat Widget Section (Initially Hidden) -->
+        <div id="appSection" class="hidden">
+            <h2>Welcome <span id="userDisplayName"></span>!</h2>
+            <p>Ask our bot about any medicine information.</p>
+            <button onclick="signOut()">Sign Out</button>
+            
+            <!-- This div will contain the Amazon Connect Chat Widget -->
+            <div id="chatContainer"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Cognito Configuration
+        const poolData = {
+            UserPoolId: 'YOUR_USER_POOL_ID',
+            ClientId: 'YOUR_APP_CLIENT_ID'
+        };
+        const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+        
+        // Toggle between login and registration forms
+        function toggleForms() {
+            document.getElementById('loginForm').classList.toggle('hidden');
+            document.getElementById('registrationForm').classList.toggle('hidden');
+            document.getElementById('confirmationDiv').classList.add('hidden');
+        }
+        
+        // Sign Up Function
+        function signUp() {
+            const username = document.getElementById('regUsername').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('regPassword').value;
+            
+            const attributeList = [];
+            attributeList.push(new AmazonCognitoIdentity.CognitoUserAttribute({
+                Name: 'email',
+                Value: email
+            }));
+            
+            userPool.signUp(username, password, attributeList, null, (err, result) => {
+                if (err) {
+                    alert(err.message || JSON.stringify(err));
+                    return;
+                }
+                document.getElementById('confirmationDiv').classList.remove('hidden');
+                alert('Registration successful. Please check your email for the confirmation code.');
+            });
+        }
+        
+        // Confirm Registration Function
+        function confirmRegistration() {
+            const username = document.getElementById('regUsername').value;
+            const code = document.getElementById('confirmationCode').value;
+            
+            const userData = {
+                Username: username,
+                Pool: userPool
+            };
+            
+            const cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
+            cognitoUser.confirmRegistration(code, true, (err, result) => {
+                if (err) {
+                    alert(err.message || JSON.stringify(err));
+                    return;
+                }
+                alert('Confirmation successful. You can now sign in.');
+                toggleForms();
+            });
+        }
+        
+        // Sign In Function
+        function signIn() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            const authenticationData = {
+                Username: username,
+                Password: password
+            };
+            
+            const authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails(authenticationData);
+            
+            const userData = {
+                Username: username,
+                Pool: userPool
+            };
+            
+            const cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
+            cognitoUser.authenticateUser(authenticationDetails, {
+                onSuccess: function(result) {
+                    // Hide auth section and show app section
+                    document.getElementById('authSection').classList.add('hidden');
+                    document.getElementById('appSection').classList.remove('hidden');
+                    document.getElementById('userDisplayName').textContent = username;
+                    
+                    // Initialize Amazon Connect Chat Widget
+                    initializeConnectChatWidget(result.getIdToken().getJwtToken());
+                },
+                onFailure: function(err) {
+                    alert(err.message || JSON.stringify(err));
+                }
+            });
+        }
+        
+        // Sign Out Function
+        function signOut() {
+            const cognitoUser = userPool.getCurrentUser();
+            if (cognitoUser) {
+                cognitoUser.signOut();
+                document.getElementById('authSection').classList.remove('hidden');
+                document.getElementById('appSection').classList.add('hidden');
+                document.getElementById('chatContainer').innerHTML = '';
+            }
+        }
+        
+        // Initialize Amazon Connect Chat Widget
+        function initializeConnectChatWidget(idToken) {
+            // Load the Amazon Connect Chat Widget script
+            const script = document.createElement('script');
+            script.src = 'https://amazon-connect-chat-interface-client.YOUR_REGION.amazonaws.com/amazon-connect-chat-interface.js';
+            script.async = true;
+            script.onload = function() {
+                // Initialize the widget with your configuration
+                amazon_connect('init', {
+                    containerId: 'chatContainer',
+                    name: 'Pharmaceutical Bot',
+                    region: 'YOUR_REGION',
+                    apiGatewayEndpoint: 'YOUR_API_GATEWAY_ENDPOINT',
+                    contactAttributes: {
+                        // You can pass user attributes here
+                        username: document.getElementById('userDisplayName').textContent
+                    },
+                    contactFlowId: 'YOUR_CONTACT_FLOW_ID',
+                    instanceId: 'YOUR_CONNECT_INSTANCE_ID',
+                    // Pass the Cognito token for authentication if needed
+                    authToken: idToken
+                });
+                
+                // Start the chat
+                amazon_connect('startChat', {
+                    // Additional parameters if needed
+                });
+            };
+            document.body.appendChild(script);
+        }
+        
+        // Check if user is already signed in
+        window.onload = function() {
+            const cognitoUser = userPool.getCurrentUser();
+            if (cognitoUser != null) {
+                cognitoUser.getSession((err, session) => {
+                    if (err) {
+                        alert(err.message || JSON.stringify(err));
+                        return;
+                    }
+                    if (session.isValid()) {
+                        // Get user attributes if needed
+                        cognitoUser.getUserAttributes((err, attributes) => {
+                            if (err) {
+                                console.error(err);
+                                return;
+                            }
+                            
+                            // Find username attribute
+                            let username = cognitoUser.getUsername();
+                            
+                            // Update UI
+                            document.getElementById('authSection').classList.add('hidden');
+                            document.getElementById('appSection').classList.remove('hidden');
+                            document.getElementById('userDisplayName').textContent = username;
+                            
+                            // Initialize Amazon Connect Chat Widget
+                            initializeConnectChatWidget(session.getIdToken().getJwtToken());
+                        });
+                    }
+                });
+            }
+        };
+    </script>
+</body>
+</html>

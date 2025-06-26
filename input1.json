@@ -1,0 +1,68 @@
+{
+    "sessionId": "022499026520910",
+    "inputTranscript": "Paracetomal",
+    "interpretations": [
+        {
+            "nluConfidence": 1,
+            "intent": {
+                "name": "ProductsIntent",
+                "slots": {},
+                "state": "InProgress",
+                "confirmationState": "None"
+            },
+            "interpretationSource": "Lex"
+        },
+        {
+            "intent": {
+                "name": "FallbackIntent",
+                "slots": {},
+                "state": "InProgress",
+                "confirmationState": "None"
+            },
+            "interpretationSource": "Lex"
+        },
+        {
+            "nluConfidence": 0.33,
+            "intent": {
+                "name": "WelcomeIntent",
+                "slots": {},
+                "state": "InProgress",
+                "confirmationState": "None"
+            },
+            "interpretationSource": "Lex"
+        }
+    ],
+    "bot": {
+        "name": "salesmedicine",
+        "version": "DRAFT",
+        "localeId": "en_US",
+        "id": "KTOXKWJ1SF",
+        "aliasId": "TSTALIASID",
+        "aliasName": "TestBotAlias"
+    },
+    "responseContentType": "text/plain; charset=utf-8",
+    "messageVersion": "1.0",
+    "sessionState": {
+        "sessionAttributes": {},
+        "activeContexts": [],
+        "intent": {
+            "name": "ProductsIntent",
+            "slots": {},
+            "state": "InProgress",
+            "confirmationState": "None"
+        },
+        "originatingRequestId": "3e5d0220-ac51-4ecf-ac5e-a2ae0a0b3fc6"
+    },
+    "invocationSource": "DialogCodeHook",
+    "transcriptions": [
+        {
+            "resolvedContext": {
+                "intent": "ProductsIntent"
+            },
+            "transcriptionConfidence": 1,
+            "transcription": "Paracetomal",
+            "resolvedSlots": {}
+        }
+    ],
+    "inputMode": "Text"
+}

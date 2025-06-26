@@ -1,0 +1,78 @@
+{
+    "sessionId": "022499026520592",
+    "inputTranscript": "Welcome Message",
+    "interpretations": [
+        {
+            "nluConfidence": 1,
+            "intent": {
+                "name": "WelcomeIntent",
+                "slots": {
+                    "CountryName": null
+                },
+                "state": "InProgress",
+                "confirmationState": "None"
+            },
+            "interpretationSource": "Lex"
+        },
+        {
+            "intent": {
+                "name": "FallbackIntent",
+                "slots": {},
+                "state": "InProgress",
+                "confirmationState": "None"
+            },
+            "interpretationSource": "Lex"
+        }
+    ],
+    "bot": {
+        "name": "salesmedicine",
+        "version": "DRAFT",
+        "localeId": "en_US",
+        "id": "KTOXKWJ1SF",
+        "aliasId": "TSTALIASID",
+        "aliasName": "TestBotAlias"
+    },
+    "responseContentType": "text/plain; charset=utf-8",
+    "proposedNextState": {
+        "prompt": {
+            "attempt": "Initial"
+        },
+        "intent": {
+            "name": "WelcomeIntent",
+            "slots": {
+                "CountryName": null
+            },
+            "state": "InProgress",
+            "confirmationState": "None"
+        },
+        "dialogAction": {
+            "type": "ElicitSlot",
+            "slotToElicit": "CountryName"
+        }
+    },
+    "messageVersion": "1.0",
+    "sessionState": {
+        "sessionAttributes": {},
+        "intent": {
+            "name": "WelcomeIntent",
+            "slots": {
+                "CountryName": null
+            },
+            "state": "InProgress",
+            "confirmationState": "None"
+        },
+        "originatingRequestId": "053b7998-eddc-4fff-9444-8e89ececad22"
+    },
+    "invocationSource": "DialogCodeHook",
+    "transcriptions": [
+        {
+            "resolvedContext": {
+                "intent": "WelcomeIntent"
+            },
+            "transcriptionConfidence": 1,
+            "transcription": "Welcome Message",
+            "resolvedSlots": {}
+        }
+    ],
+    "inputMode": "Text"
+}
