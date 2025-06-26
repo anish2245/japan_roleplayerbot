@@ -1,1 +1,77 @@
-this answer is confusing , i have a user input the input is paracitomal , the input can also be crozin , i will add crozin to the utterance , and when user gives paracitomal or crozin it will match the products intent , now inside the intent within the lambda function , if the input is paracitomal , i have a list for 2 questions fetched from dynamo db as a array of objects and kept in a variable , if the inout is crozin , again i have a list of questions in a array in a varibale , based on the user input i want to ask the questions in a list to user , and get the input of the user taht is the answer to the question and have it , how can i achieve this , i dont have a slot created for this , can you help me with the sample code on how to execute this
+import json
+
+
+def elicitIntent(intent_name, welcome_response):
+    print("Inside Elicit Intent", welcome_response)
+    response = {
+        "sessionState": {
+            "dialogAction": {"type": "ElicitIntent"},
+            "intent": {"name": intent_name},
+        },
+        "messages": [
+            {"contentType": "CustomPayload", "content": json.dumps(welcome_response)}
+        ],
+    }
+    return response
+
+
+def ask_question(question, session_attributes,intent_name):
+    print("Inside Ask Question",question)
+    response = {
+        "sessionState": {
+            "dialogAction": {"type": "ElicitIntent"},
+            "intent": {"name": intent_name},
+        },
+        "messages": [
+            {"contentType": "PlainText", "content":question['questionText'] }
+        ],
+    }
+    return response
+
+
+def lambda_handler(event, context):
+    try:
+        print("event--", json.dumps(event))
+
+        intent_name = event["sessionState"]["intent"]["name"]
+        invocation_source = event["invocationSource"]
+
+        print("Intent Name", intent_name)
+        print("invocation Source", invocation_source)
+
+        if invocation_source == "DialogCodeHook":
+            response = None
+            # Handle the Welcome Intent
+            if intent_name == "WelcomeIntent":
+                welcome_response = {
+                    "templateType": "QuickReply",
+                    "version": "1.0",
+                    "data": {
+                        "replyMessage": {
+                            "title": "Here are the list of products you can select from!"
+                        },
+                        "content": {
+                            "title": "Which department would you like?",
+                            "elements": [{"title": "paracitomal"}, {"title": "Crozin"}],
+                        },
+                    },
+                }
+                response = elicitIntent(intent_name, welcome_response)
+                return response
+            if intent_name == "ProductsIntent":
+        return response
+
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return {"statusCode": 500, "body": json.dumps(f"An error occurred: {str(e)}")} -- i am using this code for lex bot , i have 2 intents one is welcome intent and products intent , the user logs in and clicks the chatbot the welcome msg comes and in the message the user clicks on paracitomal, now oit will come to new intent products intent , here , i dont have any slots , in side the product intent , i need to ask the user few questions which is questions = [
+                        {
+                            "productType": "paracitomal",
+                            "id": "1",
+                            "questionText": "What is your age?",
+                        },
+                        {
+                            "productType": "paracitomal",
+                            "id": "2",
+                            "questionText": "Have you used paracitomal before?",
+                        }
+                    ]-- which comes after one after the other , i want to store the question and the answer , can you give me the working code of this based onthe sample code provided

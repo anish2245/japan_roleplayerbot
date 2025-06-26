@@ -1,30 +1,44 @@
 import json
 
+questions = [{
+    "productType": "paracitomal",
+    "id": "1",
+    "questionText": "What is your age?"
+}, {
+    "productType": "paracitomal",
+    "id": "2",
+    "questionText": "Have you used paracitomal before?"
+},
+{
+    "productType": "paracitomal",
+    "id": "3",
+    "questionText": "What is the recommended dosage of paracetamol for adults?"
+}]
 
-def elicitIntent(intent_name, welcome_response):
-    print("Inside Elicit Intent", welcome_response)
+
+def ask_next_question(intent_name, session_attributes, current_question_index):
+    question = questions[current_question_index]
+    session_attributes["current_question_index"] = str(current_question_index)
+
     response = {
         "sessionState": {
-            "dialogAction": {"type": "ElicitIntent"},
-            "intent": {"name": intent_name},
+            "dialogAction": {
+                "type": "ElicitSlot",
+                "slotToElicit": "AnswerSlot"
+            },
+            "intent": {
+                "name": intent_name,
+                "slots": {
+                    "AnswerSlot": None
+                },
+                "state": "InProgress"
+            },
+            "sessionAttributes": session_attributes
         },
-        "messages": [
-            {"contentType": "CustomPayload", "content": json.dumps(welcome_response)}
-        ],
-    }
-    return response
-
-
-def ask_question(question, session_attributes,intent_name):
-    print("Inside Ask Question",question)
-    response = {
-        "sessionState": {
-            "dialogAction": {"type": "ElicitIntent"},
-            "intent": {"name": intent_name},
-        },
-        "messages": [
-            {"contentType": "PlainText", "content":question['questionText'] }
-        ],
+        "messages": [{
+            "contentType": "PlainText",
+            "content": question["questionText"]
+        }],
     }
     return response
 
@@ -35,148 +49,104 @@ def lambda_handler(event, context):
 
         intent_name = event["sessionState"]["intent"]["name"]
         invocation_source = event["invocationSource"]
-        session_attributes = event.get("sessionAttributes", {})
-        input_text = event.get("inputTranscript", "").lower()
-        print("Input text",input_text)
+        session_attributes = event["sessionState"].get("sessionAttributes", {})
 
-        print("Intent Name", intent_name)
-        print("invocation Source", invocation_source)
+        print("Intent Name-->", intent_name)
+        print("invocation_source-->", invocation_source)
+        print("session_attributes outside the IF-->", session_attributes)
 
         if invocation_source == "DialogCodeHook":
-            response = None
-            # Handle the Welcome Intent
+            # Welcome Intent handler
             if intent_name == "WelcomeIntent":
                 welcome_response = {
                     "templateType": "QuickReply",
                     "version": "1.0",
                     "data": {
                         "replyMessage": {
-                            "title": "Here are the list of products you can select from!"
+                            "title":
+                            "Here are the list of products you can select from!"
                         },
                         "content": {
-                            "title": "Which department would you like?",
-                            "elements": [{"title": "paracitomal"}, {"title": "Crozin"}],
+                            "title":
+                            "Which department would you like?",
+                            "elements": [{
+                                "title": "paracitomal"
+                            }, {
+                                "title": "Crozin"
+                            }],
                         },
                     },
                 }
-                response = elicitIntent(intent_name, welcome_response)
-                return response
-            if intent_name == "ProductsIntent":
-                print("Inside Products intent",session_attributes)
-                if "questionFlow" not in session_attributes:
-                    print("Inside IF--")
-                    # First interaction - determine product and fetch questions
-                    product_type = None
-
-                    if "paracitomal" in input_text:
-                        product_type = "paracitomal"
-                    elif "crozin" in input_text:
-                        product_type = "crozin"
-
-                    if not product_type:
-                        # If product type couldn't be determined, ask for clarification
-                        return {
-                            "sessionAttributes": session_attributes,
-                            "dialogAction": {
-                                "type": "ElicitIntent",
-                                "message": {
-                                    "contentType": "PlainText",
-                                    "content": "Please specify if you are asking about paracitomal or crozin.",
-                                },
-                            },
-                        }
-
-                    questions = [
-                        {
-                            "productType": "paracitomal",
-                            "id": "1",
-                            "questionText": "What is your age?",
+                return {
+                    "sessionState": {
+                        "dialogAction": {
+                            "type": "ElicitIntent"
                         },
-                        {
-                            "productType": "paracitomal",
-                            "id": "2",
-                            "questionText": "Have you used paracitomal before?",
+                        "intent": {
+                            "name": intent_name
                         },
-                        {
-                            "productType": "crozin",
-                            "id": "1",
-                            "questionText": "Do you have any allergies?",
-                        },
-                        {
-                            "productType": "crozin",
-                            "id": "2",
-                            "questionText": "How long have you been experiencing symptoms?",
-                        },
-                    ]
-
-                    session_attributes["questionFlow"] = "active"
-                    session_attributes["productType"] = product_type
-                    session_attributes["questions"] = json.dumps(questions)
-                    session_attributes["currentQuestionIndex"] = "0"
-                    session_attributes["answers"] = json.dumps([])
-
-                    return ask_question(questions[0], session_attributes,intent_name)
-
-                else:
-                    print("in the Else block")
-                    # We're in the middle of the question flow
-                    questions = json.loads(session_attributes["questions"])
-                    current_index = int(session_attributes["currentQuestionIndex"])
-                    answers = json.loads(session_attributes["answers"])
-                    print("Answers",answers)
-                    # Store the user's answer to the current question
-                    answers.append(
-                        {
-                            "question": questions[current_index]["text"],
-                            "answer": input_text,
-                        }
-                    )
-                    session_attributes["answers"] = json.dumps(answers)
-
-                    if current_index + 1 < len(questions):
-                        # Move to the next question
-                        session_attributes["currentQuestionIndex"] = str(
-                            current_index + 1
-                        )
-                        return ask_question(
-                            questions[current_index + 1], session_attributes
-                        )
-                    else:
-                        # All questions have been answered
-                        # Process the collected answers (store in DynamoDB, etc.)
-                        #store_answers(session_attributes["productType"], answers)
-
-                        # Clear the question flow
-                        session_attributes.pop("questionFlow", None)
-                        session_attributes.pop("questions", None)
-                        session_attributes.pop("currentQuestionIndex", None)
-
-                        # End the conversation
-                        return {
-                            "sessionAttributes": session_attributes,
-                            "dialogAction": {
-                                "type": "Close",
-                                "fulfillmentState": "Fulfilled",
-                                "message": {
-                                    "contentType": "PlainText",
-                                    "content": f"Thank you for answering all the questions about {session_attributes['productType']}.",
-                                },
-                            },
-                        }
-            return {
-                "sessionAttributes": session_attributes,
-                "dialogAction": {
-                    "type": "Close",
-                    "fulfillmentState": "Fulfilled",
-                    "message": {
-                        "contentType": "PlainText",
-                        "content": "I didn't understand that. Please try again.",
                     },
-                },
-            }
+                    "messages": [{
+                        "contentType": "CustomPayload",
+                        "content": json.dumps(welcome_response)
+                    }],
+                }
 
-        return response
+            # Products Intent handler
+            elif intent_name == "ProductsIntent":
+                print("session_attributes Inside the Product Intent-->",
+                      session_attributes)
+                current_index = int(
+                    session_attributes.get("current_question_index", "-1"))
+                print("current_index", current_index)
+
+                # This means the user has just clicked 'paracitomal' — start the questioning
+                if current_index == -1:
+                    return ask_next_question(intent_name, session_attributes,
+                                             0)
+
+                # Store the answer for the previous question
+                previous_question = questions[current_index]
+                print("previous_question-->", previous_question)
+
+                user_answer = event["inputTranscript"]
+
+                print("user_answer-->", user_answer)
+                session_attributes[
+                    f"answer_{previous_question['id']}"] = user_answer
+                print("session_attributes after answer", session_attributes)
+
+                next_index = current_index + 1
+                if next_index < len(questions):
+                    return ask_next_question(intent_name, session_attributes,
+                                             next_index)
+                else:
+                    # All questions asked
+                    summary = "\n".join([
+                        f"Q: {q['questionText']} A: {session_attributes.get(f'answer_{q['id']}', '')}"
+                        for q in questions
+                    ])
+                    print("Summary -->", summary)
+                    return {
+                        "sessionState": {
+                            "dialogAction": {
+                                "type": "Close"
+                            },
+                            "intent": {
+                                "name": intent_name,
+                                "state":"Fulfilled" 
+                            },
+                            "sessionAttributes": session_attributes
+                        },
+                        "messages": [{
+                            "contentType": "PlainText",
+                             "content": "Thanks for your responses!\n" + summary
+                        }]
+                    }
 
     except Exception as e:
         print(f"Error: {str(e)}")
-        return {"statusCode": 500, "body": json.dumps(f"An error occurred: {str(e)}")}
+        return {
+            "statusCode": 500,
+            "body": json.dumps(f"An error occurred: {str(e)}")
+        }
